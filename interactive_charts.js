@@ -8,9 +8,15 @@ example: loadBarChart('data/df_sacm_by_concern_type.json', 'Figure 1: Number of 
 	dataset: File path of the JSON file
 	chart_title: Title of this chart
 	chart_x: Categorical variable used for this bar chart;
-	chart_values: Variable(s) that we are interested in; 
+	chart_values: Variable(s) that we are interested in; even if it is a single variable, it should be passed as an array
 */
 function loadBarChart (dataset, chart_title, chart_x, chart_values) {
+	// colors
+	var chart_colors = {};
+	chart_values.forEach(function(e, i) {
+		chart_colors[e] = calPalette[i];
+	})
+	
 	// reload chart
 	chart.load({
 		unload: true,
@@ -21,11 +27,9 @@ function loadBarChart (dataset, chart_title, chart_x, chart_values) {
 			value: chart_values
 		},
 		type: 'bar',
-		colors: {
-			[chart_values[0]]: calPalette[0]
-		}
+		colors: chart_colors,
 	});
-	
+
 	// title
 	d3.select('.c3-title').node().innerHTML = chart_title;
 }
@@ -41,6 +45,7 @@ example: loadPieChart('data/df_sacm_crossover.json', 'Figure 3: Percentage of Tr
 */
 function loadPieChart (dataset, chart_title, chart_x, chart_value) {
 	$.getJSON(dataset, function(jsonData) {
+		// pie chart needs a slightly different data format. construct c3js-readable data/categories
 		var data = {};
 		var categories = [];
 		jsonData.forEach(function(e) {
@@ -48,11 +53,13 @@ function loadPieChart (dataset, chart_title, chart_x, chart_value) {
 			data[e[chart_x]] = e[chart_value];
 		});
 
+		// colors
 		var chart_colors = {};
 		categories.forEach(function(e, i) {
 			chart_colors[e] = calPalette[i];
 		})
 		
+		// reload chart
 		chart.load({
 			unload: true,
 			json: [data],
@@ -63,6 +70,7 @@ function loadPieChart (dataset, chart_title, chart_x, chart_value) {
 			colors: chart_colors
 		});
 		
+		// title
 		d3.select('.c3-title').node().innerHTML = chart_title;
 	});
 	
