@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  
+	<link href="css/c3.css" rel="stylesheet">
+	<script src="js/d3.v3.min.js" charset="utf-8"></script>
+	<script src="js/c3.min.js"></script>
+	
+	<script src="js/interactive_charts.js"></script>
+
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" 
+		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+	<link href="css/report.css" rel="stylesheet">
+	<title>Interactive Graphs</title>
+</head>
+
+<body>
+	<!-- Title Jumbotron -->
+	<div class="jumbotron jumbotron-fluid">
+		<div class="container">
+			<h1 class="display-4">Time Audit Report</h1>
+			<p class="lead">This is a sample report with interactive graphs.</p>
+		</div>
+	</div>
+	
+	<div class="container">
+		<div class="row">
+			<!-- Left: Table of Contents -->
+			<div class="col-sm">		
+				<ul class="nav flex-column">
+					<li class="nav-item">
+						<a class="nav-link disabled">By Concern Type</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link active" href="#" onclick="switchChart('number_of_cases_by_concern_type')">Number of Cases</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#" onclick="switchChart('time_spent_by_concern_type')">Time Spent</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link disabled">Crossover</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#" onclick="switchChart('percentage_of_transferred_cases')">Percentage of Transferred Cases</a>
+					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#" onclick="switchChart('reslife_time_spent_by_concern_type')">ResLife Time Spent</a>
+					</li>
+				</ul>
+			</div>
+			
+			<!-- Right: chart -->
+			<div class="col-lg-auto">
+				<div id="chart"></div>
+			</div>
+		</div>
+	</div>
+	
+	<!-- Footer -->
+	<footer class="footer">
+      <div class="container">
+        <span class="text-muted">This page only works with Mozilla Firefox Browser.</span>
+      </div>
+    </footer>
+
+	<script type="text/javascript">
+		/* 
+		initializes the chart object 
+		*/
+		var chart = c3.generate({
+			size: {
+				width: 700,
+				height: 400,
+			},
+			data: {
+				columns: [
+					[]
+				],
+				type: 'bar',
+				labels: true
+			},
+			axis: {
+				x: {
+					type: 'category'
+				},
+				rotated: true
+			}
+		});
+		
+		// Default graph to display
+		switchChart('number_of_cases_by_concern_type');
+
+		/* 
+		switches graph with a new graph we want
+		example: switchGraph('time_spent_by_concern_type') 
+			graph_name: name of graph; you need a case for each graph
+		*/
+		function switchChart (graph_name) {
+			switch(graph_name) {
+				case 'number_of_cases_by_concern_type':
+					loadBarChart('data/df_sacm_by_concern_type.json',
+								'Figure 1: Number of Cases',
+								'concern_type',
+								['number_of_cases']
+								);
+					break;
+				case 'time_spent_by_concern_type':
+					loadBarChart('data/df_sacm_by_concern_type.json',
+								'Figure 2: Time Spent',
+								'concern_type',
+								['time_spent', 'time_spent_average'],
+								'time'
+								);
+					break;
+				case 'percentage_of_transferred_cases':
+					loadPieChart('data/df_sacm_crossover.json', 
+								'Figure 3: Percentage of Transferred Cases', 
+								'crossover', 
+								'percentage'
+								);
+					break;
+				case 'reslife_time_spent_by_concern_type':
+					loadBarChart('data/df_reslife_by_concern_type.json',
+								'Figure Title',
+								'concern_type',
+								['time_spent', 'time_spent_average'],
+								'time'
+								);
+					break;
+				default:
+					alert('Error');
+			}
+		}
+		
+
+	</script>
+  
+  	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" 
+		integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" 
+		integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+</body>
+</html>
