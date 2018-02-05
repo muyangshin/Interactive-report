@@ -1,0 +1,22 @@
+[
+	{
+		"type": "on_campus",
+		"response": "satisfied",
+		"percentage": 0.51416
+	},
+	{
+		"type": "on_campus",
+		"response": "dissatisfied",
+		"percentage": 0.48584
+	},
+	{
+		"type": "off_campus",
+		"response": "satisfied",
+		"percentage": 0.63124
+	},
+	{
+		"type": "off_campus",
+		"response": "dissatisfied",
+		"percentage": 0.36876
+	}
+]

@@ -21,8 +21,8 @@
 	<!-- Title Jumbotron -->
 	<div class="jumbotron jumbotron-fluid">
 		<div class="container">
-			<h1 class="display-4">Time Audit Report</h1>
-			<p class="lead">This is a sample report with interactive graphs.</p>
+			<h1 class="display-4">Interactive Chart Examples</h1>
+			<p class="lead">Visit http://c3js.org for reference</p>
 		</div>
 	</div>
 	
@@ -32,23 +32,24 @@
 			<div class="col-sm">		
 				<ul class="nav flex-column">
 					<li class="nav-item">
-						<a class="nav-link disabled">By Concern Type</a>
+						<a class="nav-link disabled">Bar Charts</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link active" href="#" onclick="switchChart('number_of_cases_by_concern_type')">Number of Cases</a>
+						<a class="nav-link active" href="#" onclick="switchChart('simple_bar')">Simple Bar Chart</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('time_spent_by_concern_type')">Time Spent</a>
+						<a class="nav-link" href="#" onclick="switchChart('multiple_bar')">Multiple Bar Chart</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link disabled">Crossover</a>
+						<a class="nav-link" href="#" onclick="switchChart('stacked_bar')">Stacked Bar Chart</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('percentage_of_transferred_cases')">Percentage of Transferred Cases</a>
+						<a class="nav-link disabled">Others</a>
 					</li>
 					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('reslife_time_spent_by_concern_type')">ResLife Time Spent</a>
+						<a class="nav-link" href="#" onclick="switchChart('pie')">Pie Chart</a>
 					</li>
+					
 				</ul>
 			</div>
 			
@@ -80,7 +81,8 @@
 					[]
 				],
 				type: 'bar',
-				labels: true
+				labels: true,
+				order: null
 			},
 			axis: {
 				x: {
@@ -91,7 +93,7 @@
 		});
 		
 		// Default graph to display
-		switchChart('number_of_cases_by_concern_type');
+		switchChart('simple_bar');
 
 		/* 
 		switches graph with a new graph we want
@@ -100,42 +102,40 @@
 		*/
 		function switchChart (graph_name) {
 			switch(graph_name) {
-				case 'number_of_cases_by_concern_type':
-					loadBarChart('data/df_sacm_by_concern_type.json',
-								'Figure 1: Number of Cases',
+				case 'simple_bar':
+					loadBarChart('data/bar_example.json',
+								'Simple Bar Chart Example',
 								'concern_type',
 								['number_of_cases']
 								);
 					break;
-				case 'time_spent_by_concern_type':
-					loadBarChart('data/df_sacm_by_concern_type.json',
-								'Figure 2: Time Spent',
+				case 'multiple_bar':
+					loadBarChart('data/bar_example.json',
+								'Multiple Bar Chart Example',
 								'concern_type',
 								['time_spent', 'time_spent_average'],
 								'time'
 								);
 					break;
-				case 'percentage_of_transferred_cases':
-					loadPieChart('data/df_sacm_crossover.json', 
-								'Figure 3: Percentage of Transferred Cases', 
+				case 'pie':
+					loadPieChart('data/pie_example.json', 
+								'Pie Chart Example', 
 								'crossover', 
 								'percentage'
 								);
 					break;
-				case 'reslife_time_spent_by_concern_type':
-					loadBarChart('data/df_reslife_by_concern_type.json',
-								'Figure Title',
-								'concern_type',
-								['time_spent', 'time_spent_average'],
-								'time'
-								);
+				case 'stacked_bar':
+					loadStackedBarChart('data/stacked_bar_example.json',
+										'Stacked Bar Chart Example',
+										'type',
+										'percentage',
+										'response'
+										);
 					break;
 				default:
 					alert('Error');
 			}
 		}
-		
-
 	</script>
   
   	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
