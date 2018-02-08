@@ -67,16 +67,19 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null)
 }
 
 /* 
-loads a stacked bar chart. Assumes numbers add up to 1, use percentage as default.
+loads a stacked bar chart.
 example: loadStackedBarChart('data/bar_example.json', 'Stacked Bar Example', 'type', 'percentage', 'response');
 
 	dataset: File path of the JSON file
 	chart_title: Title of this chart
 	var_x: Categorical variable used for this bar chart (for example, type: on-campus/off-campus)
-	var_y: Variable that we are interested in (for example, percentage); numbers should add up to 1
+	var_y: Variable that we are interested in (for example, percentage);
 	var_group: Variable to group by (for example, response: satisfied/dissatisfied)
+	label_format: 
+		percent (default): numbers should add up to 1. Y axis will be hidden.
+		time: 2.5 -> 2h 30m
 */
-function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, label_format = null) {
+function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, label_format = 'percent') {
 	$.getJSON(dataset, function(jsonData) {
 		// converts narrow data to wide
 		// use an object as an intermediate step
@@ -123,22 +126,49 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 				// grouping
 				chart.groups([categories]);
 	
-				// hide y axis
-				d3.select('.c3-axis.c3-axis-y')
-					.style("visibility", "hidden");
+				// show/hide y axis
+				if (label_format == 'percent') {
+					d3.select('.c3-axis.c3-axis-y')
+						.style("visibility", "hidden");
+				} else {
+					d3.select('.c3-axis.c3-axis-y')
+						.style("visibility", "visible");
+				}
 				
-				// data label
-				d3.select('.c3-chart-texts')
-					.selectAll('.c3-texts')
-					.each(function() {
-						d3.select(this)
-							.selectAll('text')
-							.each(function(d, i) {
-								var value_old = +d3.select(this).text();
-								var value_new = Math.round(value_old * 10000) / 100 + '%';
-								d3.select(this).text(value_new);
+ 				// data label
+				switch(label_format) {
+					case 'percent':
+						d3.select('.c3-chart-texts')
+							.selectAll('.c3-texts')
+							.each(function() {
+								d3.select(this)
+									.selectAll('text')
+									.each(function(d, i) {
+										var value_old = +d3.select(this).text();
+										var value_new = Math.round(value_old * 10000) / 100 + '%';
+										d3.select(this).text(value_new);
+									});
 							});
-					});
+						break;
+					
+					case 'time':
+						d3.select('.c3-chart-texts')
+							.selectAll('.c3-texts')
+							.each(function() {
+								d3.select(this)
+									.selectAll('text')
+									.each(function(d, i) {
+										var value_old = +d3.select(this).text();
+										var h = Math.floor(value_old);
+										var m = Math.floor((value_old - h) * 60);
+										var value_new = (h > 0 ? h + 'h ' + m + 'm' : m + 'm');
+										d3.select(this).text(value_new);
+									});
+							});
+						break;
+					default:
+						alert('Incorrect data label format!');
+				} 
 				
 			} 
 		});
