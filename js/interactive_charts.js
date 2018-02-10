@@ -1,3 +1,7 @@
+// Dimension for chart area
+var chart_width = 700;
+var chart_height = 400;
+
 // Berkeley colors
 var calPalette = ['#003262', '#FDB515', '#B9D3B6', '#D9661F', '#00B0DA', '#DDD5C7'];
 
@@ -206,16 +210,104 @@ function loadPieChart (dataset, chart_title, var_x, var_y, label_format = null) 
 		// reload chart
 		chart.load({
 			unload: true,
-			json: [data],
-			keys: {
-				value: categories
-			},
-			type: 'pie',
-			colors: chart_colors
+			done: function () {
+				chart = chart.destroy();
+				chart = c3.generate({
+					size: {
+						width: chart_width,
+						height: chart_height,
+					},
+					data: {
+						json: [data],
+						keys: {
+							value: categories
+						},
+						type: 'pie',
+						colors: chart_colors,
+						labels: true,
+						order: null
+					},
+					axis: {
+						x: {
+							type: 'category'
+						},
+						rotated: false
+					},
+					title: {
+						text: chart_title
+					}
+				});
+			}
 		});
-		
-		// title
-		d3.select('.c3-title').node().innerHTML = chart_title;
 	});
 	
+}
+
+function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_format = null) {
+	$.getJSON(dataset, function(jsonData) {
+		// converts narrow data to wide
+		// use an object as an intermediate step
+ 		var obj_data = {};
+		var categories = [];	// categories for var_group
+		jsonData.forEach(function(e) {
+			if (e[var_x] in obj_data) {
+				obj_data[e[var_x]][e[var_group]] = e[var_y];
+			} else {
+				obj_data[e[var_x]] = {
+					[var_x]: e[var_x],
+					[e[var_group]]: e[var_y]
+				};
+			}
+			
+			if (!(categories.includes(e[var_group]))) {
+				categories.push(e[var_group]);
+			}
+		}); 
+		
+		// construct data array
+		var data = [];
+		Object.keys(obj_data).forEach(function(e) {
+			data.push(obj_data[e]);
+		});
+		
+ 		// colors
+		var chart_colors = {};
+		categories.forEach(function(e, i) {
+			chart_colors[e] = calPalette[i];
+		})
+
+		// reload chart
+		chart.load({
+			unload: true,
+			done: function () {
+				chart = chart.destroy();
+				chart = c3.generate({
+					size: {
+						width: chart_width,
+						height: chart_height,
+					},
+					data: {
+						json: data,
+						keys: {
+							x: var_x,
+							value: categories
+						},
+						type: 'line',
+						colors: chart_colors,
+						labels: true,
+						order: null
+					},
+					axis: {
+						x: {
+							type: 'category'
+						},
+						rotated: false
+					},
+					title: {
+						text: chart_title
+					}
+				});
+			}
+		});
+	});
 }

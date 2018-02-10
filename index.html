@@ -49,6 +49,9 @@
 					<li class="nav-item">
 						<a class="nav-link" href="#" onclick="switchChart('pie')">Pie Chart</a>
 					</li>
+					<li class="nav-item">
+						<a class="nav-link" href="#" onclick="switchChart('line')">Line Chart</a>
+					</li>
 					
 				</ul>
 			</div>
@@ -130,6 +133,14 @@
 										'type',
 										'percentage',
 										'response'
+										);
+					break;
+				case 'line':
+					loadLineChart('data/line_example.json',
+										'Line Chart Example',
+										'Year',
+										'Score',
+										'Factor'
 										);
 					break;
 				default:
