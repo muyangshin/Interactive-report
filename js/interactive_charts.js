@@ -5,6 +5,30 @@ var chart_height = 400;
 // Berkeley colors
 var calPalette = ['#003262', '#FDB515', '#B9D3B6', '#D9661F', '#00B0DA', '#DDD5C7'];
 
+// returns an object for data label formatting
+function formatLabel (format_type) {
+	switch(format_type) {
+		case 'percent', 'percentage':
+			label_format_object = { format: d3.format(".2%") };
+			break;
+		case 'time':
+			label_format_object = {
+				format: function(v, id, i, j) {
+					var h = Math.floor(v);
+					var m = Math.floor((v - h) * 60);
+					var v_new = (h > 0 ? h + 'h ' + m + 'm' : m + 'm');
+					return v_new;
+				}
+			};
+			break;
+		default:
+			label_format_object = true;
+	}
+	
+	return label_format_object;
+}
+		
+		
 /* 
 loads a bar chart
 example: loadBarChart('data/bar_example.json', 'Bar Chart Example', 'concern_type', ['number_of_cases']);
@@ -26,43 +50,35 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null)
 	// reload chart
 	chart.load({
 		unload: true,
-		url: dataset,
-		mimeType: 'json',
-		keys: {
-			x: var_x,
-			value: var_ys
-		},
-		type: 'bar',
-		colors: chart_colors,
 		done: function() {
-			if (label_format != null) {
-				// show y axis
-				d3.select('.c3-axis.c3-axis-y')
-					.style("visibility", "visible");
-					
-				// data label
-				switch(label_format) {
-					// time: 2.5 -> 2h 30m
-					case 'time':
-						d3.select('.c3-chart-texts')
-							.selectAll('.c3-texts')
-							.each(function() {
-								d3.select(this)
-									.selectAll('text')
-									.each(function(d, i) {
-										var value_old = +d3.select(this).text();
-										var h = Math.floor(value_old);
-										var m = Math.floor((value_old - h) * 60);
-										var value_new = (h > 0 ? h + 'h ' + m + 'm' : m + 'm');
-										d3.select(this).text(value_new);
-									});
-							});
-						break;
-					default:
-						alert('Incorrect label format name');
+			chart = chart.destroy();
+			chart = c3.generate({
+				size: {
+					width: chart_width,
+					height: chart_height,
+				},
+				data: {
+					url: dataset,
+					mimeType: 'json',
+					keys: {
+						x: var_x,
+						value: var_ys
+					},
+					type: 'bar',
+					labels: formatLabel(label_format),
+					colors: chart_colors,
+					order: null
+				},
+				axis: {
+					x: {
+						type: 'category'
+					},
+					rotated: true
+				},
+				title: {
+					text: chart_title
 				}
-				
-			}
+			});
 		}
 	});
 
@@ -115,70 +131,44 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 		categories.forEach(function(e, i) {
 			chart_colors[e] = calPalette[i];
 		})
-	
+		
 		// reload chart
 		chart.load({
 			unload: true,
-			json: data,
-			keys: {
-				x: var_x,
-				value: categories
-			},
-			type: 'bar',
-	 		colors: chart_colors,
 			done: function() {
-				// grouping
-				chart.groups([categories]);
-	
-				// show/hide y axis
-				if (label_format == 'percent') {
-					d3.select('.c3-axis.c3-axis-y')
-						.style("visibility", "hidden");
-				} else {
-					d3.select('.c3-axis.c3-axis-y')
-						.style("visibility", "visible");
-				}
-				
- 				// data label
-				switch(label_format) {
-					case 'percent':
-						d3.select('.c3-chart-texts')
-							.selectAll('.c3-texts')
-							.each(function() {
-								d3.select(this)
-									.selectAll('text')
-									.each(function(d, i) {
-										var value_old = +d3.select(this).text();
-										var value_new = Math.round(value_old * 10000) / 100 + '%';
-										d3.select(this).text(value_new);
-									});
-							});
-						break;
-					
-					case 'time':
-						d3.select('.c3-chart-texts')
-							.selectAll('.c3-texts')
-							.each(function() {
-								d3.select(this)
-									.selectAll('text')
-									.each(function(d, i) {
-										var value_old = +d3.select(this).text();
-										var h = Math.floor(value_old);
-										var m = Math.floor((value_old - h) * 60);
-										var value_new = (h > 0 ? h + 'h ' + m + 'm' : m + 'm');
-										d3.select(this).text(value_new);
-									});
-							});
-						break;
-					default:
-						alert('Incorrect data label format!');
-				} 
-				
-			} 
+				chart = chart.destroy();
+				chart = c3.generate({
+					size: {
+						width: chart_width,
+						height: chart_height,
+					},
+					data: {
+						json: data,
+						keys: {
+							x: var_x,
+							value: categories
+						},
+						type: 'bar',
+						groups: [categories],
+						labels: formatLabel(label_format),
+						colors: chart_colors,
+						order: null
+					},
+					axis: {
+						x: {
+							type: 'category'
+						},
+						y :{
+							show: false
+						},
+						rotated: true
+					},
+					title: {
+						text: chart_title
+					}
+				});
+			}
 		});
-
-		// title
-		d3.select('.c3-title').node().innerHTML = chart_title;
 	});
 }
 
@@ -243,6 +233,16 @@ function loadPieChart (dataset, chart_title, var_x, var_y, label_format = null) 
 	
 }
 
+/* 
+loads a pie chart
+example: loadLineChart('data/line_example.json', Line Chart Example', 'Year', 'Score', 'Factor');
+	dataset: File path of the JSON file
+	chart_title: Title of this chart
+	var_x: Variable for x-axis (for example, year)
+	var_y: Variable for y-axis (for example, score)
+	var_group: Variable that we want to use to group data (for example, factor_type)
+	label_format
+*/
 function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_format = null) {
 	$.getJSON(dataset, function(jsonData) {
 		// converts narrow data to wide
@@ -294,7 +294,7 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 						},
 						type: 'line',
 						colors: chart_colors,
-						labels: true,
+						labels: formatLabel(label_format),
 						order: null
 					},
 					axis: {
