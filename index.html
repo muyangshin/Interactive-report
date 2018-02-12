@@ -109,7 +109,7 @@
 					loadBarChart('data/bar_example.json',
 								'Simple Bar Chart Example',
 								'concern_type',
-								['number_of_cases']
+								['number_of_cases'],
 								);
 					break;
 				case 'multiple_bar':
@@ -132,7 +132,8 @@
 										'Stacked Bar Chart Example',
 										'type',
 										'percentage',
-										'response'
+										'response',
+										'percentage'
 										);
 					break;
 				case 'line':
@@ -140,7 +141,9 @@
 										'Line Chart Example',
 										'Year',
 										'Score',
-										'Factor'
+										'Factor',
+										null,
+										[4.2, 6.4]
 										);
 					break;
 				default:
