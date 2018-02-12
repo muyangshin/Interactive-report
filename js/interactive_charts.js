@@ -217,10 +217,11 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 					},
 					color: {
 						pattern: calPalette
+					},
+					onrendered: function () {
+						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 					}
 				});
-				
-				d3.selectAll('.c3-chart-texts text').style('fill', '#003262');
 			}
 		});
 	});
@@ -384,10 +385,11 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 					},
 					color: {
 						pattern: calPalette
+					},
+					onrendered: function () {
+						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 					}
 				});
-				
-				d3.selectAll('.c3-chart-texts text').style('fill', '#003262');
 			}
 		});
 	});
