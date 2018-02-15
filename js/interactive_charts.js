@@ -140,7 +140,7 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 			
 			// single stacked bar
 			var obj_data = {
-				"type": "dummy"
+				"type": var_group
 			}
 			var categories = [];			
 			
