@@ -44,6 +44,9 @@
 						<a class="nav-link" href="#" onclick="switchChart('stacked_bar')">Stacked Bar Chart</a>
 					</li>
 					<li class="nav-item">
+						<a class="nav-link" href="#" onclick="switchChart('single_stacked_bar')">Stacked Bar Chart (Single)</a>
+					</li>
+					<li class="nav-item">
 						<a class="nav-link disabled">Others</a>
 					</li>
 					<li class="nav-item">
@@ -131,6 +134,15 @@
 					loadStackedBarChart('data/stacked_bar_example.json',
 										'Stacked Bar Chart Example',
 										'type',
+										'percentage',
+										'response',
+										'percentage'
+										);
+					break;
+				case 'single_stacked_bar':
+					loadStackedBarChart('data/single_stacked_bar_example.json',
+										'Stacked Bar Chart Example',
+										null,
 										'percentage',
 										'response',
 										'percentage'

@@ -120,7 +120,7 @@ example: loadStackedBarChart('data/bar_example.json', 'Stacked Bar Example', 'ty
 
 	dataset: File path of the JSON file
 	chart_title: Title of this chart
-	var_x: Categorical variable used for this bar chart (for example, type: on-campus/off-campus)
+	var_x: Categorical variable used for this bar chart (for example, type: on-campus/off-campus); use null in case of one stacked bar
 	var_y: Variable that we are interested in (for example, percentage);
 	var_group: Variable to group by (for example, response: satisfied/dissatisfied)
 	label_format (optional): See formatLabel. Use percent as default
@@ -128,31 +128,63 @@ example: loadStackedBarChart('data/bar_example.json', 'Stacked Bar Example', 'ty
 	y_range (optional): Range for y-axis. [y_min, y_max]
 */
 function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, label_format = 'percent', y_range = null) {
+	// handle percentage
+	if (label_format == 'percentage') {
+		label_format = 'percent'
+	}
+	
 	$.getJSON(dataset, function(jsonData) {
-		// converts narrow data to wide
-		// use an object as an intermediate step
-		var obj_data = {};
-		var categories = [];	// categories for var_group
-		jsonData.forEach(function(e) {
-			if (e[var_x] in obj_data) {
-				obj_data[e[var_x]][e[var_group]] = e[var_y];
-			} else {
-				obj_data[e[var_x]] = {
-					[var_x]: e[var_x],
-					[e[var_group]]: e[var_y]
-				};
-			}
+		// construct data: converts narrow to wide
+		if (var_x == null) {
+			var is_single_bar = true;
 			
-			if (!(categories.includes(e[var_group]))) {
-				categories.push(e[var_group]);
+			// single stacked bar
+			var obj_data = {
+				"type": "dummy"
 			}
-		});
-		
-		// construct data array
-		var data = [];
-		Object.keys(obj_data).forEach(function(e) {
-			data.push(obj_data[e]);
-		});
+			var categories = [];			
+			
+			jsonData.forEach(function(e) {
+				obj_data[e[var_group]] = e[var_y];
+				categories.push(e[var_group]);
+			});
+			
+			var data = [obj_data];
+			
+			// dummy category variable
+			var_x = "type";
+			
+			// show x axis
+			x_show = false;
+		} else {
+			// multiple stacked bars
+			// use an object as an intermediate step
+			var obj_data = {};
+			var categories = [];	// categories for var_group
+			jsonData.forEach(function(e) {
+				if (e[var_x] in obj_data) {
+					obj_data[e[var_x]][e[var_group]] = e[var_y];
+				} else {
+					obj_data[e[var_x]] = {
+						[var_x]: e[var_x],
+						[e[var_group]]: e[var_y]
+					};
+				}
+				
+				if (!(categories.includes(e[var_group]))) {
+					categories.push(e[var_group]);
+				}
+			});
+			
+			// construct data array
+			var data = [];
+			Object.keys(obj_data).forEach(function(e) {
+				data.push(obj_data[e]);
+			});
+			
+			// show x axis
+			x_show = true;
+		}
 		
 		// colors
 		var chart_colors = {};
@@ -162,20 +194,38 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 		
 		// y axis
 		var y_show = true;
-		if (label_format == 'percent' || label_format == 'percentage') {
+		if (label_format == 'percent') {
 			y_show = false;
 		}
 		
+		// y axis range
 		var y_min = null;
 		var y_max = null;
 		var y_padding = null;
-		if (y_range != null) {
+		if (label_format == 'percent') {
+			y_min = 0;
+			y_max = 1;
+			y_padding = {
+				top: 100,
+				bottom: 0
+			};
+		} else if (y_range != null) {
 			y_min = y_range[0];
 			y_max = y_range[1];
 			y_padding = {
 				top: 0,
 				bottom: 0
 			};
+		}
+		
+		// bar width ratio
+		bar_width_ratio = 0.6;
+		if (is_single_bar) {
+			y_padding = {
+				top: 100,
+				bottom: 100
+			};
+			bar_width_ratio = 0.3;
 		}
 		
 		// reload chart
@@ -197,11 +247,16 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 						type: 'bar',
 						groups: [categories],
 						labels: formatLabel(label_format),
-						// colors: chart_colors,
 						order: null
+					},
+					bar: {
+						width: {
+							ratio: bar_width_ratio
+						}
 					},
 					axis: {
 						x: {
+							show: x_show,
 							type: 'category'
 						},
 						y :{
@@ -220,6 +275,18 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 					},
 					onrendered: function () {
 						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
+						
+						// data label positioning
+/* 						if (label_format == 'percent') {
+							var cum_x = 50;
+							d3.selectAll('.c3-chart-texts text')
+								.each(function(d, i) {
+									var x = +d3.select(this).attr("x");
+									d3.select(this).attr("x", (x - cum_x) / 2 + cum_x);
+									
+									cum_x += (x - cum_x);
+								});
+						} */
 					}
 				});
 			}
@@ -268,7 +335,6 @@ function loadPieChart (dataset, chart_title, var_x, var_y) {
 							value: categories
 						},
 						type: 'pie',
-						// colors: chart_colors,
 						labels: true,
 						order: null
 					},
@@ -365,7 +431,6 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 							value: categories
 						},
 						type: 'line',
-						// colors: chart_colors,
 						labels: formatLabel(label_format),
 						order: null
 					},
