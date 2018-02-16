@@ -98,8 +98,10 @@
 			}
 		});
 		
-		// Default graph to display
-		switchChart('simple_bar');
+		// Default graph to display; have to wait a little until the chart is rendered
+		setTimeout(function () {
+			switchChart('simple_bar');
+		}, 10);
 
 		/* 
 		switches graph with a new graph we want
