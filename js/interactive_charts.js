@@ -16,7 +16,7 @@ function formatLabel (format_type) {
 	switch(format_type) {
 		case 'percent':
 		case 'percentage':
-			label_format_object = { format: d3.format(".2%") };
+			label_format_object = { format: d3.format(".1%") };
 			break;
 		case 'time':
 			label_format_object = {
