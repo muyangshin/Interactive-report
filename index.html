@@ -26,43 +26,52 @@
 		</div>
 	</div>
 	
-	<div class="container">
-		<div class="row">
+	<div class="container-fluid">
+		<div class="row flex-xl-nowrap">
 			<!-- Left: Table of Contents -->
-			<div class="col-sm">		
-				<ul class="nav flex-column">
-					<li class="nav-item">
-						<a class="nav-link disabled">Bar Charts</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link active" href="#" onclick="switchChart('simple_bar')">Simple Bar Chart</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('multiple_bar')">Multiple Bar Chart</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('stacked_bar')">Stacked Bar Chart</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('single_stacked_bar')">Stacked Bar Chart (Single)</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link disabled">Others</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('pie')">Pie Chart</a>
-					</li>
-					<li class="nav-item">
-						<a class="nav-link" href="#" onclick="switchChart('line')">Line Chart</a>
-					</li>
-					
-				</ul>
+			<div class="col-12 col-md-3 col-xl-2 bd-sidebar">
+				<nav class="collapse bd-links" id="bd-docs-nav">
+					<div class="bd-toc-item active">
+						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
+							Bar Charts
+						</a>
+
+						<ul class="nav bd-sidenav">
+							<li class="active bd-sidenav-active"><a href="#" onclick="selectChart(this, 'simple_bar')">
+								Simple Bar
+							</a></li>
+							<li><a href="#" onclick="selectChart(this, 'multiple_bar')">
+								Multiple Bar
+							</a></li>
+							<li><a href="#" onclick="selectChart(this, 'stacked_bar')">
+								Stacked Bar
+							</a></li>
+							<li><a href="#" onclick="selectChart(this, 'single_stacked_bar')">
+								Single Stacked Bar
+							</a></li>
+						</ul>
+					</div>
+					<div class="bd-toc-item">
+						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
+							Others
+						</a>
+
+						<ul class="nav bd-sidenav">
+							<li><a href="#" onclick="selectChart(this, 'pie')">
+								Pie Chart
+							</a></li>
+							<li><a href="#" onclick="selectChart(this, 'line')">
+								Line Chart
+							</a></li>
+						</ul>
+					</div>
+				</nav>
 			</div>
 			
 			<!-- Right: chart -->
-			<div class="col-lg-auto">
+			<main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content">
 				<div id="chart"></div>
-			</div>
+			</main>
 		</div>
 	</div>
 	
@@ -104,12 +113,12 @@
 		}, 10);
 
 		/* 
-		switches graph with a new graph we want
-		example: switchGraph('time_spent_by_concern_type') 
-			graph_name: name of graph; you need a case for each graph
+		switches chart with a new chart we want
+		example: switchChart('time_spent_by_concern_type') 
+			chart_name: name of chart; you need a case for each chart
 		*/
-		function switchChart (graph_name) {
-			switch(graph_name) {
+		function switchChart (chart_name) {
+			switch(chart_name) {
 				case 'simple_bar':
 					loadBarChart('data/bar_example.json',
 								'Simple Bar Chart Example',
@@ -163,6 +172,19 @@
 				default:
 					alert('Error');
 			}
+		}
+		
+		// expands the selected category and collapses everything else
+		function selectCategory (element) {
+			$(".bd-toc-item").removeClass("active");
+			$(element).parent().addClass("active");
+		}
+		
+		// 
+		function selectChart (element, chart_name) {
+			$("ul.nav.bd-sidenav li").removeClass("active bd-sidenav-active");
+			$(element).parent().addClass("active bd-sidenav-active");
+			switchChart(chart_name);
 		}
 	</script>
   

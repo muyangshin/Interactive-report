@@ -9,7 +9,7 @@ var calPalette = ['#003262', '#FDB515', '#B9D3B6', '#D9661F', '#00B0DA', '#DDD5C
  returns an object for data label formatting
  
  supported types:
-	percent, percentage
+	percent
 	time: 2.5 -> 2h 30m
 */
 function formatLabel (format_type) {
@@ -86,7 +86,6 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null,
 					},
 					type: 'bar',
 					labels: formatLabel(label_format),
-					// colors: chart_colors,
 					order: null
 				},
 				axis: {
