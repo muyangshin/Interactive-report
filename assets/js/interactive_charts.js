@@ -16,26 +16,30 @@ function formatLabel (format_type) {
 	switch(format_type) {
 		case 'percent':
 		case 'percentage':
-			label_format_object = { format: d3.format(".1%") };
+			return d3.format(".1%");
 			break;
 		case 'time':
-			label_format_object = {
-				format: function(v, id, i, j) {
+			return function(v, id, i, j) {
 					var h = Math.floor(v);
 					var m = Math.floor((v - h) * 60);
 					var v_new = (h > 0 ? h + 'h ' + m + 'm' : m + 'm');
 					return v_new;
-				}
-			};
+					};
 			break;
 		default:
-			label_format_object = true;
+			return null;
 	}
-	
-	return label_format_object;
 }
-		
-		
+
+function formatLabelObject (format_type) {
+	var formatLabel_function = formatLabel(format_type);
+	if (formatLabel_function == null) {
+		return true;
+	} else {
+		return {format: formatLabel_function};
+	}
+}
+
 /* 
 loads a bar chart
 example: loadBarChart('data/bar_example.json', 'Bar Chart Example', 'concern_type', ['number_of_cases']);
@@ -85,7 +89,7 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null,
 						value: var_ys
 					},
 					type: 'bar',
-					labels: formatLabel(label_format),
+					labels: formatLabelObject(label_format),
 					order: null
 				},
 				axis: {
@@ -98,6 +102,17 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null,
 						padding: y_padding
 					},
 					rotated: true
+				},
+				tooltip: {
+					format : {
+						value: function (value, ratio, id) {
+							if (formatLabel(label_format) == null) {
+								return value;
+							} else {
+								return (formatLabel(label_format))(value);
+							}
+						}
+					}
 				},
 				title: {
 					text: chart_title
@@ -245,7 +260,7 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 						},
 						type: 'bar',
 						groups: [categories],
-						labels: formatLabel(label_format),
+						labels: formatLabelObject(label_format),
 						order: null
 					},
 					bar: {
@@ -265,6 +280,17 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 							padding: y_padding
 						},
 						rotated: true
+					},
+					tooltip: {
+						format : {
+							value: function (value, ratio, id) {
+								if (formatLabel(label_format) == null) {
+									return value;
+								} else {
+									return (formatLabel(label_format))(value);
+								}
+							}
+						}
 					},
 					title: {
 						text: chart_title
@@ -430,7 +456,7 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 							value: categories
 						},
 						type: 'line',
-						labels: formatLabel(label_format),
+						labels: formatLabelObject(label_format),
 						order: null
 					},
 					axis: {
@@ -443,6 +469,17 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 							padding: y_padding
 						},
 						rotated: false
+					},
+					tooltip: {
+						format : {
+							value: function (value, ratio, id) {
+								if (formatLabel(label_format) == null) {
+									return value;
+								} else {
+									return (formatLabel(label_format))(value);
+								}
+							}
+						}
 					},
 					title: {
 						text: chart_title
