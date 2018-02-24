@@ -6,10 +6,10 @@ var chart_height = 400;
 var calPalette = ['#003262', '#FDB515', '#B9D3B6', '#D9661F', '#00B0DA', '#DDD5C7'];
 
 /*
- returns an object for data label formatting
+determines a function to format data labels and tooltips
  
- supported types:
-	percent
+supported types:
+	percent, percentage
 	time: 2.5 -> 2h 30m
 */
 function formatLabel (format_type) {
@@ -31,6 +31,9 @@ function formatLabel (format_type) {
 	}
 }
 
+/* 
+uses formatLabel to return an object for data.labels
+*/
 function formatLabelObject (format_type) {
 	var formatLabel_function = formatLabel(format_type);
 	if (formatLabel_function == null) {
@@ -494,4 +497,14 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 			}
 		});
 	});
+}
+
+function readText(filename) {
+	$.get("assets/txts/" + filename + ".txt", function (data) {
+		var lines = data.split("\n");
+		$.each(lines, function(index, value) {
+			lines[index] = "<p>" + value + "</p>"
+		});
+		$("#main-text").html(lines);
+	}, 'text');
 }

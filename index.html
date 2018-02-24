@@ -32,36 +32,55 @@
 			<div class="col-12 col-md-3 col-xl-2 bd-sidebar">
 				<nav class="collapse bd-links" id="bd-docs-nav">
 					<div class="bd-toc-item active">
+						<a class="bd-toc-link" href="#" onclick="selectCategory(this); selectPage(this, 'introduction', false, true)">
+							Introduction
+						</a>
+					</div>
+					<div class="bd-toc-item">
 						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
 							Bar Charts
 						</a>
 
 						<ul class="nav bd-sidenav">
-							<li class="active bd-sidenav-active"><a href="#" onclick="selectChart(this, 'simple_bar')">
+							<li><a href="#" onclick="selectPage(this, 'simple_bar')">
 								Simple Bar
 							</a></li>
-							<li><a href="#" onclick="selectChart(this, 'multiple_bar')">
+							<li><a href="#" onclick="selectPage(this, 'multiple_bar')">
 								Multiple Bar
 							</a></li>
-							<li><a href="#" onclick="selectChart(this, 'stacked_bar')">
+							<li><a href="#" onclick="selectPage(this, 'stacked_bar')">
 								Stacked Bar
 							</a></li>
-							<li><a href="#" onclick="selectChart(this, 'single_stacked_bar')">
+							<li><a href="#" onclick="selectPage(this, 'single_stacked_bar')">
 								Single Stacked Bar
 							</a></li>
 						</ul>
 					</div>
 					<div class="bd-toc-item">
 						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
-							Others
+							Other Charts
 						</a>
 
 						<ul class="nav bd-sidenav">
-							<li><a href="#" onclick="selectChart(this, 'pie')">
+							<li><a href="#" onclick="selectPage(this, 'pie')">
 								Pie Chart
 							</a></li>
-							<li><a href="#" onclick="selectChart(this, 'line')">
+							<li><a href="#" onclick="selectPage(this, 'line')">
 								Line Chart
+							</a></li>
+						</ul>
+					</div>
+					<div class="bd-toc-item">
+						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
+							Texts
+						</a>
+
+						<ul class="nav bd-sidenav">
+							<li><a href="#" onclick="selectPage(this, 'chart_with_text', true, true)">
+								Chart + Text
+							</a></li>
+							<li><a href="#" onclick="selectPage(this, 'text_only', false, true)">
+								Text Only
 							</a></li>
 						</ul>
 					</div>
@@ -70,7 +89,8 @@
 			
 			<!-- Right: chart -->
 			<main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content">
-				<div id="chart"></div>
+				<div id="chart" style="display: none;"></div>
+				<div id="main-text" style="display: none;"></div>
 			</main>
 		</div>
 	</div>
@@ -86,7 +106,7 @@
 		/* 
 		initializes the chart object 
 		*/
-		var chart = c3.generate({
+ 		var chart = c3.generate({
 			size: {
 				width: 700,
 				height: 400,
@@ -107,10 +127,11 @@
 			}
 		});
 		
-		// Default graph to display; have to wait a little until the chart is rendered
+		// Default page to display; have to wait a little until the chart is rendered
 		setTimeout(function () {
-			switchChart('simple_bar');
+			selectPage(null, 'introduction', false, true);
 		}, 10);
+		
 
 		/* 
 		switches chart with a new chart we want
@@ -120,6 +141,7 @@
 		function switchChart (chart_name) {
 			switch(chart_name) {
 				case 'simple_bar':
+				case 'chart_with_text':
 					loadBarChart('data/bar_example.json',
 								'Simple Bar Chart Example',
 								'concern_type',
@@ -180,11 +202,29 @@
 			$(element).parent().addClass("active");
 		}
 		
-		// 
-		function selectChart (element, chart_name) {
-			$("ul.nav.bd-sidenav li").removeClass("active bd-sidenav-active");
-			$(element).parent().addClass("active bd-sidenav-active");
-			switchChart(chart_name);
+		// displays the selected page
+		function selectPage (element, page_name, has_chart = true, has_text = false) {
+			// table of contents formatting
+			if (element != null) {
+				$("ul.nav.bd-sidenav li").removeClass("active bd-sidenav-active");
+				$(element).parent().addClass("active bd-sidenav-active");
+			}
+			
+			// chart
+			if (has_chart) {
+				$("#chart").show();
+				switchChart(page_name);
+			} else {
+				$("#chart").hide();
+			}
+			
+			// text
+			if (has_text) {
+				readText(page_name);
+				$("#main-text").show();
+			} else {
+				$("#main-text").hide();
+			}
 		}
 	</script>
   
