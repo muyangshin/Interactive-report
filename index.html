@@ -202,7 +202,11 @@
 			$(element).parent().addClass("active");
 		}
 		
-		// displays the selected page
+		/*
+		displays the selected page
+			for pages with charts, page name should be used as chart name
+			for pages with text, page name should be used as text filename
+		*/
 		function selectPage (element, page_name, has_chart = true, has_text = false) {
 			// table of contents formatting
 			if (element != null) {

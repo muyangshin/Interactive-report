@@ -2,21 +2,32 @@
 	{
 		"type": "on_campus",
 		"response": "satisfied",
-		"percentage": 0.51416
+		"percentage": 0.50416
+	},
+	{
+		"type": "on_campus",
+		"response": "neutral",
+		"percentage": 0.01000
 	},
 	{
 		"type": "on_campus",
 		"response": "dissatisfied",
 		"percentage": 0.48584
 	},
+
 	{
 		"type": "off_campus",
 		"response": "satisfied",
-		"percentage": 0.63124
+		"percentage": 0.60124
+	},
+	{
+		"type": "off_campus",
+		"response": "neutral",
+		"percentage": 0.05500
 	},
 	{
 		"type": "off_campus",
 		"response": "dissatisfied",
-		"percentage": 0.36876
+		"percentage": 0.34376
 	}
 ]

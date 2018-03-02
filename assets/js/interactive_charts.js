@@ -153,9 +153,9 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 	$.getJSON(dataset, function(jsonData) {
 		// construct data: converts narrow to wide
 		if (var_x == null) {
+			// single stacked bar
 			var is_single_bar = true;
 			
-			// single stacked bar
 			var obj_data = {
 				"type": var_group
 			}
@@ -245,78 +245,105 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 			bar_width_ratio = 0.3;
 		}
 		
-		// reload chart
-		chart.load({
-			unload: true,
-			done: function() {
-				chart = chart.destroy();
-				chart = c3.generate({
-					size: {
-						width: chart_width,
-						height: chart_height,
-					},
-					data: {
-						json: data,
-						keys: {
-							x: var_x,
-							value: categories
-						},
-						type: 'bar',
-						groups: [categories],
-						labels: formatLabelObject(label_format),
-						order: null
-					},
-					bar: {
-						width: {
-							ratio: bar_width_ratio
+		chart = chart.destroy();
+		chart = c3.generate({
+			size: {
+				width: chart_width,
+				height: chart_height,
+			},
+			data: {
+				json: data,
+				keys: {
+					x: var_x,
+					value: categories
+				},
+				type: 'bar',
+				groups: [categories],
+				labels: formatLabelObject(label_format),
+				order: null
+			},
+			bar: {
+				width: {
+					ratio: bar_width_ratio
+				}
+			},
+			axis: {
+				x: {
+					show: x_show,
+					type: 'category'
+				},
+				y :{
+					show: y_show,
+					min: y_min,
+					max: y_max,
+					padding: y_padding
+				},
+				rotated: true
+			},
+			tooltip: {
+				format : {
+					value: function (value, ratio, id) {
+						if (formatLabel(label_format) == null) {
+							return value;
+						} else {
+							return (formatLabel(label_format))(value);
 						}
-					},
-					axis: {
-						x: {
-							show: x_show,
-							type: 'category'
-						},
-						y :{
-							show: y_show,
-							min: y_min,
-							max: y_max,
-							padding: y_padding
-						},
-						rotated: true
-					},
-					tooltip: {
-						format : {
-							value: function (value, ratio, id) {
-								if (formatLabel(label_format) == null) {
-									return value;
+					}
+				}
+			},
+			title: {
+				text: chart_title
+			},
+			color: {
+				pattern: calPalette
+			},
+			onrendered: function () {
+				d3.selectAll('.c3-chart-texts text').style('fill', 'black');
+				
+				// data label positioning
+				if (label_format == 'percent') {
+					if (is_single_bar) {
+						var cum_x = 60;
+						d3.selectAll('text.c3-text.c3-text-0')
+							.each(function(d, i) {
+								var x = +d3.select(this).attr("x");
+								if (d.value >= 0.1) {
+									d3.select(this).attr("x", x - 35);
 								} else {
-									return (formatLabel(label_format))(value);
+									d3.select(this).attr("x", x - 30);
 								}
-							}
-						}
-					},
-					title: {
-						text: chart_title
-					},
-					color: {
-						pattern: calPalette
-					},
-					onrendered: function () {
-						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
-						
-						// data label positioning
-/* 						if (label_format == 'percent') {
-							var cum_x = 50;
-							d3.selectAll('.c3-chart-texts text')
+
+								if (d.value < 0.05) {
+									d3.select(this).style('display', 'none');
+								}
+								
+								if (i == 0) {
+									d3.select(this).style('fill', 'white');
+								}
+						});
+					} else {
+						$.each(Object.keys(obj_data), function(index, value) {
+							var cum_x = 0;
+							d3.selectAll('text.c3-text.c3-text-' + index)
 								.each(function(d, i) {
 									var x = +d3.select(this).attr("x");
-									d3.select(this).attr("x", (x - cum_x) / 2 + cum_x);
+									if (d.value >= 0.1) {
+										d3.select(this).attr("x", x - 35);
+									} else {
+										d3.select(this).attr("x", x - 30);
+									}
 									
-									cum_x += (x - cum_x);
-								});
-						} */
+									if (d.value < 0.05) {
+										d3.select(this).style('display', 'none');
+									}
+									
+									if (i == 0) {
+										d3.select(this).style('fill', 'white');
+									}
+							});
+						});
 					}
-				});
+				}
 			}
 		});
 	});
@@ -499,6 +526,10 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 	});
 }
 
+/*
+loads and displays a text file
+should use page name as filename
+*/
 function readText(filename) {
 	$.get("assets/txts/" + filename + ".txt", function (data) {
 		var lines = data.split("\n");
