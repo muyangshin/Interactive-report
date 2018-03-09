@@ -55,6 +55,10 @@ body {
     display: none;
 }
 
+.bd-toc-item.active {
+	padding: 1rem 0 1rem 0;
+}
+
 .bd-toc-item.active > .bd-sidenav {
     display: block;
 }
