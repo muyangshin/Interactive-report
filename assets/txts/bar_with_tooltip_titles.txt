@@ -1,0 +1,1 @@
+If your var_x is "Question", it automatically tries to use "Question_tooltip" as tooltip titles.

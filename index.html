@@ -48,6 +48,9 @@
 							<li><a href="#" onclick="selectPage(this, 'multiple_bar')">
 								Multiple Bar
 							</a></li>
+							<li><a href="#" onclick="selectPage(this, 'bar_with_tooltip_titles', true, true)">
+								Bar with Tooltip Titles
+							</a></li>
 							<li><a href="#" onclick="selectPage(this, 'stacked_bar')">
 								Stacked Bar
 							</a></li>
@@ -156,6 +159,13 @@
 								'time'
 								);
 					break;
+				case 'bar_with_tooltip_titles':
+					loadBarChart('data/bar_example_with_tooltip_titles.json',
+								'Bar Chart with Tooltip Titles Example',
+								'Question',
+								['Average']
+								);
+					break;	
 				case 'pie':
 					loadPieChart('data/pie_example.json', 
 								'Pie Chart Example', 

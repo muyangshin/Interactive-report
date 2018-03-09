@@ -74,60 +74,75 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null,
 		};
 	}
 	
-	// reload chart
-	chart.load({
-		unload: true,
-		done: function() {
-			chart = chart.destroy();
-			chart = c3.generate({
-				size: {
-					width: chart_width,
-					height: chart_height,
-				},
-				data: {
-					url: dataset,
-					mimeType: 'json',
-					keys: {
-						x: var_x,
-						value: var_ys
+	$.getJSON(dataset, function(jsonData) {
+		// tooltip titles
+		var tooltip_titles = [];
+		jsonData.forEach(function(e) {
+			if (e[var_x + '_tooltip'] != undefined) {
+				tooltip_titles.push(e[var_x + '_tooltip']);
+			} else {
+				tooltip_titles.push(e[var_x]);
+			}
+		});
+		
+		// reload chart
+		chart.load({
+			unload: true,
+			done: function() {
+				chart = chart.destroy();
+				chart = c3.generate({
+					size: {
+						width: chart_width,
+						height: chart_height,
 					},
-					type: 'bar',
-					labels: formatLabelObject(label_format),
-					order: null
-				},
-				axis: {
-					x: {
-						type: 'category'
+					data: {
+						url: dataset,
+						mimeType: 'json',
+						keys: {
+							x: var_x,
+							value: var_ys
+						},
+						type: 'bar',
+						labels: formatLabelObject(label_format),
+						order: null
 					},
-					y: {
-						min: y_min,
-						max: y_max,
-						padding: y_padding
+					axis: {
+						x: {
+							type: 'category'
+						},
+						y: {
+							min: y_min,
+							max: y_max,
+							padding: y_padding
+						},
+						rotated: true
 					},
-					rotated: true
-				},
-				tooltip: {
-					format : {
-						value: function (value, ratio, id) {
-							if (formatLabel(label_format) == null) {
-								return value;
-							} else {
-								return (formatLabel(label_format))(value);
+					tooltip: {
+						format : {
+							title: function (d) {
+								return tooltip_titles[d];
+							},
+							value: function (value, ratio, id) {
+								if (formatLabel(label_format) == null) {
+									return value;
+								} else {
+									return (formatLabel(label_format))(value);
+								}
 							}
 						}
+					},
+					title: {
+						text: chart_title
+					},
+					color: {
+						pattern: calPalette
+					},
+					onrendered: function () {
+						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 					}
-				},
-				title: {
-					text: chart_title
-				},
-				color: {
-					pattern: calPalette
-				},
-				onrendered: function () {
-					d3.selectAll('.c3-chart-texts text').style('fill', 'black');
-				}
-			});
-		}
+				});
+			}
+		});
 	});
 }
 

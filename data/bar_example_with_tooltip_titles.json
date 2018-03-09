@@ -1,0 +1,17 @@
+[
+	{
+		"Question": "Q1",
+		"Question_tooltip": "I understand the impact of my behavior on myself",
+		"Average": 5.4
+	},
+	{
+		"Question": "Q2",
+		"Question_tooltip": "I understand my rights, responsibilities, and the residential code of conduct",
+		"Average": 5.6
+	},
+	{
+		"Question": "Q3",
+		"Question_tooltip": "I understand the importance of community standards",
+		"Average": 5.3
+	}
+]
