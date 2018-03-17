@@ -1,3 +1,4 @@
-<h3>Lorem Ipsum</h3>
+[[simple_bar]]
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel turpis et neque tristique blandit in a metus. Quisque a euismod nunc. Nam vestibulum molestie purus, nec ultricies diam commodo a. Duis eu metus velit. Donec tortor orci, lobortis id quam at, iaculis mattis urna. Fusce porttitor mauris non varius bibendum. Aliquam euismod pellentesque sem, ut lobortis eros vestibulum et. Pellentesque rhoncus nibh eu justo pretium pharetra. Etiam ante elit, ultricies eget eleifend non.
+[[line]]
 Faucibus non leo. Aenean in nulla porta, molestie nisi vitae, vestibulum augue. Morbi vitae libero vestibulum, gravida arcu eget, finibus ex. Quisque non velit et lectus gravida consequat eu at urna. Quisque bibendum diam eu metus mollis, feugiat feugiat quam porttitor. In nec consequat quam. Suspendisse ultricies tristique risus, at euismod nisi egestas malesuada. Praesent non sodales mi. 

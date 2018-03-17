@@ -75,15 +75,15 @@
 					</div>
 					<div class="bd-toc-item">
 						<a class="bd-toc-link" href="#" onclick="selectCategory(this)">
-							Texts
+							Layout
 						</a>
 
 						<ul class="nav bd-sidenav">
-							<li><a href="#" onclick="selectPage(this, 'chart_with_text', true, true)">
-								Chart + Text
-							</a></li>
 							<li><a href="#" onclick="selectPage(this, 'text_only', false, true)">
 								Text Only
+							</a></li>
+							<li><a href="#" onclick="selectPage(this, 'more_than_one_chart')">
+								More than one chart
 							</a></li>
 						</ul>
 					</div>
@@ -92,8 +92,6 @@
 			
 			<!-- Right: chart -->
 			<main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content">
-				<div id="chart" style="display: none;"></div>
-				<div id="main-text" style="display: none;"></div>
 			</main>
 		</div>
 	</div>
@@ -106,53 +104,34 @@
     </footer>
 
 	<script type="text/javascript">
-		/* 
-		initializes the chart object 
-		*/
- 		var chart = c3.generate({
-			size: {
-				width: 700,
-				height: 400,
-			},
-			data: {
-				columns: [
-					[]
-				],
-				type: 'bar',
-				labels: true,
-				order: null
-			},
-			axis: {
-				x: {
-					type: 'category'
-				},
-				rotated: true
-			}
-		});
+		// array to store chart objects
+		var chart_objs = [];
 		
-		// Default page to display; have to wait a little until the chart is rendered
+		// Default page to display; have to wait a little until the page is rendered
 		setTimeout(function () {
-			selectPage(null, 'introduction', false, true);
+			selectPage(null, 'introduction');
 		}, 10);
-		
 
 		/* 
-		switches chart with a new chart we want
-		example: switchChart('time_spent_by_concern_type') 
+		inserts a chart to a div
+		example: insertChart('chart0', 'time_spent_by_concern_type') 
+			div_id: id of div to insert a chart
 			chart_name: name of chart; you need a case for each chart
 		*/
-		function switchChart (chart_name) {
+		function insertChart (div_id, chart_name) {
 			switch(chart_name) {
 				case 'simple_bar':
 				case 'chart_with_text':
-					loadBarChart('data/bar_example.json',
+					loadBarChart(div_id,
+								'data/bar_example.json',
 								'Simple Bar Chart Example',
 								'concern_type',
 								['number_of_cases'],
 								);
 					break;
 				case 'multiple_bar':
-					loadBarChart('data/bar_example.json',
+					loadBarChart(div_id,
+								'data/bar_example.json',
 								'Multiple Bar Chart Example',
 								'concern_type',
 								['time_spent', 'time_spent_average'],
@@ -160,21 +139,24 @@
 								);
 					break;
 				case 'bar_with_tooltip_titles':
-					loadBarChart('data/bar_example_with_tooltip_titles.json',
+					loadBarChart(div_id,
+								'data/bar_example_with_tooltip_titles.json',
 								'Bar Chart with Tooltip Titles Example',
 								'Question',
 								['Average']
 								);
 					break;	
 				case 'pie':
-					loadPieChart('data/pie_example.json', 
+					loadPieChart(div_id,
+								'data/pie_example.json', 
 								'Pie Chart Example', 
 								'crossover', 
 								'percentage'
 								);
 					break;
 				case 'stacked_bar':
-					loadStackedBarChart('data/stacked_bar_example.json',
+					loadStackedBarChart(div_id,
+										'data/stacked_bar_example.json',
 										'Stacked Bar Chart Example',
 										'type',
 										'percentage',
@@ -183,7 +165,8 @@
 										);
 					break;
 				case 'single_stacked_bar':
-					loadStackedBarChart('data/single_stacked_bar_example.json',
+					loadStackedBarChart(div_id,
+										'data/single_stacked_bar_example.json',
 										'Stacked Bar Chart Example',
 										null,
 										'percentage',
@@ -192,17 +175,18 @@
 										);
 					break;
 				case 'line':
-					loadLineChart('data/line_example.json',
-										'Line Chart Example',
-										'Year',
-										'Score',
-										'Factor',
-										null,
-										[4.2, 6.4]
-										);
+					loadLineChart(div_id,
+									'data/line_example.json',
+									'Line Chart Example',
+									'Year',
+									'Score',
+									'Factor',
+									null,
+									[4.2, 6.4]
+									);
 					break;
 				default:
-					alert('Error');
+					alert("Error: invalid chart name (" + chart_name + ")");
 			}
 		}
 		
@@ -214,31 +198,54 @@
 		
 		/*
 		displays the selected page
-			for pages with charts, page name should be used as chart name
-			for pages with text, page name should be used as text filename
+			first tries to load the layout from /pages/; if not existing, loads a single chart using page_name
+			chart name should be surrounded by double squared brackets: [[chart_name]]
 		*/
-		function selectPage (element, page_name, has_chart = true, has_text = false) {
+		function selectPage (element, page_name) {
 			// table of contents formatting
 			if (element != null) {
 				$("ul.nav.bd-sidenav li").removeClass("active bd-sidenav-active");
 				$(element).parent().addClass("active bd-sidenav-active");
 			}
 			
-			// chart
-			if (has_chart) {
-				$("#chart").show();
-				switchChart(page_name);
-			} else {
-				$("#chart").hide();
-			}
+			// destroy previous charts
+			$.each(chart_objs, function(index, chart) {
+				chart = chart.destroy();
+			});
+			chart_objs = [];
 			
-			// text
-			if (has_text) {
-				readText(page_name);
-				$("#main-text").show();
-			} else {
-				$("#main-text").hide();
-			}
+			// remove previous content
+			$("main").empty();
+			
+			$.get("assets/pages/" + page_name + ".txt", function (data) {
+				// page layout provided
+				var index_chart = 0;
+				var lines = data.split("\n");
+				
+				$.each(lines, function(index, value) {
+					/* alert(value.substring(0, 2) == "[[");
+					alert(value.substring(value.length - 3, value.length - 1) == "]]"); */
+					if (value.substring(0, 2) == "[[" && value.substring(value.length - 3, value.length - 1) == "]]") {
+						// chart
+						var chart_name = value.substring(2, value.length - 3);
+						var chart_id = "chart" + index_chart;
+						
+						$("main").append("<div id='" + chart_id + "' class='div_chart'></div>");
+						insertChart(chart_id, chart_name);
+						
+						index_chart += 1;
+					} else {
+						// text
+						$("main").append("<p>" + value + "</p>");
+					}
+				});
+				
+			}, 'text')
+			.fail(function() {
+				// no page layout provided; single chart without text
+				$("main").append("<div id='chart0' class='div_chart'></div>");
+				insertChart("chart0", page_name);
+			});
 		}
 	</script>
   

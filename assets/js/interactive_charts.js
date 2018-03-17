@@ -54,7 +54,10 @@ example: loadBarChart('data/bar_example.json', 'Bar Chart Example', 'concern_typ
 	label_format (optional): see formatLabel
 	y_range (optional): Range for y-axis. [y_min, y_max]
 */
-function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null, y_range = null) {
+function loadBarChart (div_id, dataset, chart_title, var_x, var_ys, label_format = null, y_range = null) {
+	// chart obj
+	var chart = null;
+	
 	// colors
 	var chart_colors = {};
 	var_ys.forEach(function(e, i) {
@@ -85,64 +88,62 @@ function loadBarChart (dataset, chart_title, var_x, var_ys, label_format = null,
 			}
 		});
 		
-		// reload chart
-		chart.load({
-			unload: true,
-			done: function() {
-				chart = chart.destroy();
-				chart = c3.generate({
-					size: {
-						width: chart_width,
-						height: chart_height,
+		chart = c3.generate({
+			bindto: "#" + div_id,
+			size: {
+				width: chart_width,
+				height: chart_height,
+			},
+			data: {
+				url: dataset,
+				mimeType: 'json',
+				keys: {
+					x: var_x,
+					value: var_ys
+				},
+				type: 'bar',
+				labels: formatLabelObject(label_format),
+				order: null
+			},
+			axis: {
+				x: {
+					type: 'category'
+				},
+				y: {
+					min: y_min,
+					max: y_max,
+					padding: y_padding
+				},
+				rotated: true
+			},
+			tooltip: {
+				format : {
+					title: function (d) {
+						return tooltip_titles[d];
 					},
-					data: {
-						url: dataset,
-						mimeType: 'json',
-						keys: {
-							x: var_x,
-							value: var_ys
-						},
-						type: 'bar',
-						labels: formatLabelObject(label_format),
-						order: null
-					},
-					axis: {
-						x: {
-							type: 'category'
-						},
-						y: {
-							min: y_min,
-							max: y_max,
-							padding: y_padding
-						},
-						rotated: true
-					},
-					tooltip: {
-						format : {
-							title: function (d) {
-								return tooltip_titles[d];
-							},
-							value: function (value, ratio, id) {
-								if (formatLabel(label_format) == null) {
-									return value;
-								} else {
-									return (formatLabel(label_format))(value);
-								}
-							}
+					value: function (value, ratio, id) {
+						if (formatLabel(label_format) == null) {
+							return value;
+						} else {
+							return (formatLabel(label_format))(value);
 						}
-					},
-					title: {
-						text: chart_title
-					},
-					color: {
-						pattern: calPalette
-					},
-					onrendered: function () {
-						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 					}
-				});
+				}
+			},
+			title: {
+				text: chart_title
+			},
+			color: {
+				pattern: calPalette
+			},
+			onrendered: function () {
+				d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 			}
 		});
+	})
+	.done(function() {
+		// store the object so that it can be destroyed later
+		chart_objs.push(chart);
 	});
 }
 
@@ -159,7 +160,10 @@ example: loadStackedBarChart('data/bar_example.json', 'Stacked Bar Example', 'ty
 		percent (default): numbers should add up to 1. Y axis will be hidden.
 	y_range (optional): Range for y-axis. [y_min, y_max]
 */
-function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, label_format = 'percent', y_range = null) {
+function loadStackedBarChart (div_id, dataset, chart_title, var_x, var_y, var_group, label_format = 'percent', y_range = null) {
+	// chart obj
+	var chart = null;
+	
 	// handle percentage
 	if (label_format == 'percentage') {
 		label_format = 'percent'
@@ -260,8 +264,8 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 			bar_width_ratio = 0.3;
 		}
 		
-		chart = chart.destroy();
 		chart = c3.generate({
+			bindto: "#" + div_id,
 			size: {
 				width: chart_width,
 				height: chart_height,
@@ -361,6 +365,10 @@ function loadStackedBarChart (dataset, chart_title, var_x, var_y, var_group, lab
 				}
 			}
 		});
+	})	
+	.done(function() {
+		// store the object so that it can be destroyed later
+		chart_objs.push(chart);
 	});
 }
 
@@ -373,7 +381,10 @@ example: loadPieChart('data/pie_example.json', 'Pie Chart Example', 'crossover',
 	var_x: Categorical variable used for this bar chart;
 	var_ys: Variable that we are interested in; 
 */
-function loadPieChart (dataset, chart_title, var_x, var_y) {
+function loadPieChart (div_id, dataset, chart_title, var_x, var_y) {
+	// chart obj
+	var chart = null;
+	
 	$.getJSON(dataset, function(jsonData) {
 		// converts narrow data to wide
 		var data = {};
@@ -389,42 +400,40 @@ function loadPieChart (dataset, chart_title, var_x, var_y) {
 			chart_colors[e] = calPalette[i];
 		})
 		
-		// reload chart
-		chart.load({
-			unload: true,
-			done: function () {
-				chart = chart.destroy();
-				chart = c3.generate({
-					size: {
-						width: chart_width,
-						height: chart_height,
-					},
-					data: {
-						json: [data],
-						keys: {
-							value: categories
-						},
-						type: 'pie',
-						labels: true,
-						order: null
-					},
-					axis: {
-						x: {
-							type: 'category'
-						},
-						rotated: false
-					},
-					title: {
-						text: chart_title
-					},
-					color: {
-						pattern: calPalette
-					}
-				});
+		// generate chart
+		chart = c3.generate({
+			bindto: "#" + div_id,
+			size: {
+				width: chart_width,
+				height: chart_height,
+			},
+			data: {
+				json: [data],
+				keys: {
+					value: categories
+				},
+				type: 'pie',
+				labels: true,
+				order: null
+			},
+			axis: {
+				x: {
+					type: 'category'
+				},
+				rotated: false
+			},
+			title: {
+				text: chart_title
+			},
+			color: {
+				pattern: calPalette
 			}
 		});
+	})
+	.done(function() {
+		// store the object so that it can be destroyed later
+		chart_objs.push(chart);
 	});
-	
 }
 
 /* 
@@ -438,7 +447,10 @@ example: loadLineChart('data/line_example.json', Line Chart Example', 'Year', 'S
 	label_format (optional): See formatLabel
 	y_range (optional): Range for y-axis. [y_min, y_max]
 */
-function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_format = null, y_range = null) {
+function loadLineChart (div_id, dataset, chart_title, var_x, var_y, var_group, label_format = null, y_range = null) {
+	// chart object
+	var chart = null;
+	
 	$.getJSON(dataset, function(jsonData) {
 		// converts narrow data to wide
 		// use an object as an intermediate step
@@ -484,73 +496,58 @@ function loadLineChart (dataset, chart_title, var_x, var_y, var_group, label_for
 			};
 		}
 
-		// reload chart
-		chart.load({
-			unload: true,
-			done: function () {
-				chart = chart.destroy();
-				chart = c3.generate({
-					size: {
-						width: chart_width,
-						height: chart_height,
-					},
-					data: {
-						json: data,
-						keys: {
-							x: var_x,
-							value: categories
-						},
-						type: 'line',
-						labels: formatLabelObject(label_format),
-						order: null
-					},
-					axis: {
-						x: {
-							type: 'category'
-						},
-						y: {
-							min: y_min,
-							max: y_max,
-							padding: y_padding
-						},
-						rotated: false
-					},
-					tooltip: {
-						format : {
-							value: function (value, ratio, id) {
-								if (formatLabel(label_format) == null) {
-									return value;
-								} else {
-									return (formatLabel(label_format))(value);
-								}
-							}
+		// generate chart
+		chart = c3.generate({
+			bindto: "#" + div_id,
+			size: {
+				width: chart_width,
+				height: chart_height,
+			},
+			data: {
+				json: data,
+				keys: {
+					x: var_x,
+					value: categories
+				},
+				type: 'line',
+				labels: formatLabelObject(label_format),
+				order: null
+			},
+			axis: {
+				x: {
+					type: 'category'
+				},
+				y: {
+					min: y_min,
+					max: y_max,
+					padding: y_padding
+				},
+				rotated: false
+			},
+			tooltip: {
+				format : {
+					value: function (value, ratio, id) {
+						if (formatLabel(label_format) == null) {
+							return value;
+						} else {
+							return (formatLabel(label_format))(value);
 						}
-					},
-					title: {
-						text: chart_title
-					},
-					color: {
-						pattern: calPalette
-					},
-					onrendered: function () {
-						d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 					}
-				});
+				}
+			},
+			title: {
+				text: chart_title
+			},
+			color: {
+				pattern: calPalette
+			},
+			onrendered: function () {
+				d3.selectAll('.c3-chart-texts text').style('fill', 'black');
 			}
 		});
+	})
+	.done(function() {
+		// store the object so that it can be destroyed later
+		chart_objs.push(chart);
 	});
-}
-
-/*
-loads and displays a text file
-should use page name as filename
-*/
-function readText(filename) {
-	$.get("assets/txts/" + filename + ".txt", function (data) {
-		var lines = data.split("\n");
-		$.each(lines, function(index, value) {
-			lines[index] = "<p>" + value + "</p>"
-		});
-		$("#main-text").html(lines);
-	}, 'text');
 }
