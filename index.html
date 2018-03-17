@@ -223,11 +223,11 @@
 				var lines = data.split("\n");
 				
 				$.each(lines, function(index, value) {
-					/* alert(value.substring(0, 2) == "[[");
-					alert(value.substring(value.length - 3, value.length - 1) == "]]"); */
-					if (value.substring(0, 2) == "[[" && value.substring(value.length - 3, value.length - 1) == "]]") {
+					// remove lf character at the end
+					value = value.trim()
+					if (value.substring(0, 2) == "[[" && value.substring(value.length - 2) == "]]") {
 						// chart
-						var chart_name = value.substring(2, value.length - 3);
+						var chart_name = value.substring(2, value.length - 2);
 						var chart_id = "chart" + index_chart;
 						
 						$("main").append("<div id='" + chart_id + "' class='div_chart'></div>");
