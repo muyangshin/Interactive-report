@@ -317,13 +317,13 @@ function loadStackedBarChart (div_id, dataset, chart_title, var_x, var_y, var_gr
 				pattern: calPalette
 			},
 			onrendered: function () {
-				d3.selectAll('.c3-chart-texts text').style('fill', 'black');
+				d3.selectAll('div#' + div_id + ' .c3-chart-texts text').style('fill', 'black');
 				
 				// data label positioning
 				if (label_format == 'percent') {
 					if (is_single_bar) {
 						var cum_x = 60;
-						d3.selectAll('text.c3-text.c3-text-0')
+						d3.selectAll('div#' + div_id + ' text.c3-text.c3-text-0')
 							.each(function(d, i) {
 								var x = +d3.select(this).attr("x");
 								if (d.value >= 0.1) {
@@ -343,7 +343,7 @@ function loadStackedBarChart (div_id, dataset, chart_title, var_x, var_y, var_gr
 					} else {
 						$.each(Object.keys(obj_data), function(index, value) {
 							var cum_x = 0;
-							d3.selectAll('text.c3-text.c3-text-' + index)
+							d3.selectAll('div#' + div_id + ' text.c3-text.c3-text-' + index)
 								.each(function(d, i) {
 									var x = +d3.select(this).attr("x");
 									if (d.value >= 0.1) {
