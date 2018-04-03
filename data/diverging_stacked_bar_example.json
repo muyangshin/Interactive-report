@@ -1,0 +1,85 @@
+[
+	{
+		"type": "Building A",
+		"response": "Strongly Disagree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building A",
+		"response": "Moderately Disagree",
+		"percentage": 0.2
+	},
+	{
+		"type": "Building A",
+		"response": "Strongly Agree",
+		"percentage": 0.2
+	},
+	{
+		"type": "Building A",
+		"response": "Moderately Agree",
+		"percentage": 0.5
+	},
+	
+	{
+		"type": "Building B",
+		"response": "Strongly Disagree",
+		"percentage": 0.2
+	},
+	{
+		"type": "Building B",
+		"response": "Moderately Disagree",
+		"percentage": 0.3
+	},
+	{
+		"type": "Building B",
+		"response": "Strongly Agree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building B",
+		"response": "Moderately Agree",
+		"percentage": 0.4
+	},
+	
+	{
+		"type": "Building C",
+		"response": "Strongly Disagree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building C",
+		"response": "Moderately Disagree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building C",
+		"response": "Strongly Agree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building C",
+		"response": "Moderately Agree",
+		"percentage": 0.3
+	},
+	
+	{
+		"type": "Building D",
+		"response": "Strongly Disagree",
+		"percentage": 0.1
+	},
+	{
+		"type": "Building D",
+		"response": "Moderately Disagree",
+		"percentage": 0.15
+	},
+	{
+		"type": "Building D",
+		"response": "Strongly Agree",
+		"percentage": 0.4
+	},
+	{
+		"type": "Building D",
+		"response": "Moderately Agree",
+		"percentage": 0.3
+	}
+]

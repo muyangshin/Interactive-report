@@ -57,6 +57,9 @@
 							<li><a href="#" onclick="selectPage(this, 'single_stacked_bar')">
 								Single Stacked Bar
 							</a></li>
+							<li><a href="#" onclick="selectPage(this, 'diverging_stacked_bar')">
+								Diverging Stacked Bar
+							</a></li>
 						</ul>
 					</div>
 					<div class="bd-toc-item">
@@ -184,6 +187,16 @@
 									null,
 									[4.2, 6.4]
 									);
+					break;
+				case 'diverging_stacked_bar':
+					loadDivergingStackedBarChart(div_id,
+												'data/diverging_stacked_bar_example.json',
+												'Diverging Stacked Bar Chart Example',
+												'type',
+												'percentage',
+												'response',
+												['Strongly Disagree', 'Moderately Disagree', 'Moderately Agree', 'Strongly Agree']
+												);
 					break;
 				default:
 					alert("Error: invalid chart name (" + chart_name + ")");

@@ -18,6 +18,11 @@ function formatLabel (format_type) {
 		case 'percentage':
 			return d3.format(".1%");
 			break;
+		case 'percent_positive':
+			return function (v, id, i, j) {
+						return (formatLabel('percent'))(Math.abs(v));
+					};
+			break;
 		case 'time':
 			return function(v, id, i, j) {
 					var h = Math.floor(v);
@@ -546,6 +551,237 @@ function loadLineChart (div_id, dataset, chart_title, var_x, var_y, var_group, l
 			}
 		});
 	})
+	.done(function() {
+		// store the object so that it can be destroyed later
+		chart_objs.push(chart);
+	});
+}
+
+/* 
+loads a diverging stacked bar chart.
+example: loadDivergingStackedBarChart(div_id,
+									'data/diverging_stacked_bar_example.json',
+									'Diverging Stacked Bar Chart Example',
+									'type',
+									'percentage',
+									'response',
+									['Strongly Disagree', 'Moderately Disagree', 'Moderately Agree', 'Strongly Agree']
+									);
+
+	div_id: id of the div to bind this chart
+	dataset: File path of the JSON file
+	chart_title: Title of this chart
+	var_x: Categorical variable used for this bar chart (for example, type (takes values of building A, B, C))
+	var_y: Numerical variable that we are interested in (for example, percentage)
+	var_group: Variable to group by (for example, response (takes values of 'Strongly Disagree', 'Moderately Disagree', ...))
+	groups: Array of groups that we are interested in, from most negative to most positive; DON'T INCLUDE neutral response
+	group_neutral: not functional yet
+*/
+function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y, var_group, groups, group_neutral = null) {
+	// chart obj
+	var chart = null;
+	
+	$.getJSON(dataset, function(jsonData) {
+		// construct data: same as in stacked bar chart
+		// use an object as an intermediate step
+		var obj_data = {};
+		var categories = [];	// categories for var_group
+		jsonData.forEach(function(e) {
+			if (e[var_x] in obj_data) {
+				obj_data[e[var_x]][e[var_group]] = e[var_y];
+			} else {
+				obj_data[e[var_x]] = {
+					[var_x]: e[var_x],
+					[e[var_group]]: e[var_y]
+				};
+			}
+			
+			if (!(categories.includes(e[var_group]))) {
+				categories.push(e[var_group]);
+			}
+		});
+		
+		// construct data array
+		var data = [];
+		Object.keys(obj_data).forEach(function(e) {
+			data.push(obj_data[e]);
+		});
+		
+		// convert to diverging stacked bar
+		// array of var_x's
+		var xs = [];
+		$.each(data, function (i, row) {
+			xs.push(row[var_x]);
+		});
+		
+		// display negative numbers as positive
+		$.each(data, function (i, row) {				
+			$.each(groups, function (j, group) {
+				data[i][group] = data[i][group] * (j + 1 <= groups.length / 2 ? -1 : 1);
+			});
+			
+		});
+				
+		// convert json to column array
+		var data_columns = [];
+		$.each(groups, function (i, e_group) {
+			var row_array = [e_group];
+			$.each(data, function (j, e_data) {
+				row_array.push(e_data[e_group]);
+			});
+			data_columns.push(row_array);
+		});
+		
+		// stacking order: extreme responses should come first
+		var stack_order = []
+		var j = 0
+		for (var i = 0; i < groups.length; i++) {
+			// index; Strongly Disagree -> Moderately Disagree -> ... -> Strongly Agree -> Moderately Agree -> ...
+			if (i >= groups.length / 2) {
+				j = groups.length - (i - groups.length / 2) - 1;
+			} else {
+				j = i;
+			}
+			
+			stack_order.push(groups[j]);
+		}
+		
+		// colors
+		if (categories.length == 4) {
+			var chart_colors = ['#ed403c', '#f38e72', '#56c4c5', '#00acac'];
+		} else if (categories.length == 6) {
+			var chart_colors = ['#ed403c', '#f38e72', '#fdcfc0', '#56c4c5', '#bbe3e3', '#00acac'];
+		}
+			
+		// y axis range
+		var y_min = null;
+		var y_max = null;
+		var y_padding = null;
+		
+		// axes: set as y2
+		var axes_object = {};
+		$.each(groups, function(i, e) {
+			axes_object[e] = 'y2';
+		});
+		
+		// generate chart
+		chart = c3.generate({
+			bindto: "#" + div_id,
+			size: {
+				width: chart_width,
+				height: chart_height,
+			},
+			padding: {
+				top: 20
+			},
+			data: {
+				columns: data_columns,
+				keys: {
+					x: var_x
+				},
+				type: 'bar',
+				groups: [categories],
+				labels: formatLabelObject('percent_positive'),
+				order: stack_order,
+				axes: axes_object
+			},
+			bar: {
+				width: {
+					ratio: 0.5
+				}
+			},
+			axis: {
+				x: {
+					show: true,
+					type: 'category',
+					categories: xs
+				},
+				y :{
+					show: false
+				},
+				y2: {
+					show: true,
+					min: y_min,
+					max: y_max,
+					padding: y_padding,
+					tick: {
+						format: function (x) { 
+							return (d3.format(".0%"))(Math.abs(x));
+						}
+					}
+				},
+				rotated: true
+			},
+			grid: {
+				y: {
+					lines: [
+						{value: 0, axis: 'y2'}
+					]
+				}
+			},
+ 			tooltip: {
+				format : {
+					value: function (value, ratio, id) {
+						return (formatLabel('percent'))(Math.abs(value));
+					}
+				}
+			},
+			title: {
+				text: chart_title
+			},
+			color: {
+				pattern: chart_colors
+			},
+			onrendered: function () {
+				d3.selectAll('div#' + div_id + ' .c3-chart-texts text').style('fill', 'black');
+				
+				// data label positioning
+				if (label_format == 'percent') {
+					if (is_single_bar) {
+						var cum_x = 60;
+						d3.selectAll('div#' + div_id + ' text.c3-text.c3-text-0')
+							.each(function(d, i) {
+								var x = +d3.select(this).attr("x");
+								if (d.value >= 0.1) {
+									d3.select(this).attr("x", x - 35);
+								} else {
+									d3.select(this).attr("x", x - 30);
+								}
+
+								if (d.value < 0.05) {
+									d3.select(this).style('display', 'none');
+								}
+								
+								if (i == 0) {
+									d3.select(this).style('fill', 'white');
+								}
+						});
+					} else {
+						$.each(Object.keys(obj_data), function(index, value) {
+							var cum_x = 0;
+							d3.selectAll('div#' + div_id + ' text.c3-text.c3-text-' + index)
+								.each(function(d, i) {
+									var x = +d3.select(this).attr("x");
+									if (d.value >= 0.1) {
+										d3.select(this).attr("x", x - 35);
+									} else {
+										d3.select(this).attr("x", x - 30);
+									}
+									
+									if (d.value < 0.05) {
+										d3.select(this).style('display', 'none');
+									}
+									
+									if (i == 0) {
+										d3.select(this).style('fill', 'white');
+									}
+							});
+						});
+					}
+				}
+			}
+		});
+	})	
 	.done(function() {
 		// store the object so that it can be destroyed later
 		chart_objs.push(chart);
