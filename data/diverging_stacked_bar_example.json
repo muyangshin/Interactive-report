@@ -17,7 +17,12 @@
 	{
 		"type": "Building A",
 		"response": "Moderately Agree",
-		"percentage": 0.5
+		"percentage": 0.3
+	},
+	{
+		"type": "Building A",
+		"response": "Neutral",
+		"percentage": 0.2
 	},
 	
 	{
@@ -38,7 +43,12 @@
 	{
 		"type": "Building B",
 		"response": "Moderately Agree",
-		"percentage": 0.4
+		"percentage": 0.3
+	},
+	{
+		"type": "Building B",
+		"response": "Neutral",
+		"percentage": 0.1
 	},
 	
 	{
@@ -60,6 +70,11 @@
 		"type": "Building C",
 		"response": "Moderately Agree",
 		"percentage": 0.3
+	},
+	{
+		"type": "Building C",
+		"response": "Neutral",
+		"percentage": 0.4
 	},
 	
 	{
@@ -81,5 +96,10 @@
 		"type": "Building D",
 		"response": "Moderately Agree",
 		"percentage": 0.3
+	},
+	{
+		"type": "Building D",
+		"response": "Neutral",
+		"percentage": 0.05
 	}
 ]

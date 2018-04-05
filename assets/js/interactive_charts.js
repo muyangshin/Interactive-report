@@ -574,10 +574,9 @@ example: loadDivergingStackedBarChart(div_id,
 	var_x: Categorical variable used for this bar chart (for example, type (takes values of building A, B, C))
 	var_y: Numerical variable that we are interested in (for example, percentage)
 	var_group: Variable to group by (for example, response (takes values of 'Strongly Disagree', 'Moderately Disagree', ...))
-	groups: Array of groups that we are interested in, from most negative to most positive; DON'T INCLUDE neutral response
-	group_neutral: not functional yet
+	groups: Array of groups that we are interested in, from most negative to most positive; neutral response should be in the middle
 */
-function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y, var_group, groups, group_neutral = null) {
+function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y, var_group, groups) {
 	// chart obj
 	var chart = null;
 	
@@ -585,7 +584,6 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 		// construct data: same as in stacked bar chart
 		// use an object as an intermediate step
 		var obj_data = {};
-		var categories = [];	// categories for var_group
 		jsonData.forEach(function(e) {
 			if (e[var_x] in obj_data) {
 				obj_data[e[var_x]][e[var_group]] = e[var_y];
@@ -594,10 +592,6 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 					[var_x]: e[var_x],
 					[e[var_group]]: e[var_y]
 				};
-			}
-			
-			if (!(categories.includes(e[var_group]))) {
-				categories.push(e[var_group]);
 			}
 		});
 		
@@ -621,36 +615,72 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 			});
 			
 		});
-				
+		
 		// convert json to column array
 		var data_columns = [];
+		var categories = [];	// categories for var_group
+		var group_neutral = null;
 		$.each(groups, function (i, e_group) {
-			var row_array = [e_group];
-			$.each(data, function (j, e_data) {
-				row_array.push(e_data[e_group]);
-			});
-			data_columns.push(row_array);
+			if (i == (groups.length - 1) / 2) {
+				// neutral response
+				group_neutral = e_group;
+				
+				// negative part
+				var row_array = [group_neutral + "0"];
+				$.each(data, function (j, e_data) {
+					row_array.push(-e_data[e_group] / 2);
+				});
+				data_columns.push(row_array);
+				categories.push(group_neutral + "0");
+				
+				// positive part
+				var row_array = [group_neutral + "1"];
+				$.each(data, function (j, e_data) {
+					row_array.push(e_data[e_group] / 2);
+				});
+				data_columns.push(row_array);
+				categories.push(group_neutral + "1");
+			} else {
+				// other responses
+				var row_array = [e_group];
+				$.each(data, function (j, e_data) {
+					row_array.push(e_data[e_group]);
+				});
+				data_columns.push(row_array);
+				categories.push(e_group);
+			}			
 		});
 		
 		// stacking order: extreme responses should come first
 		var stack_order = []
 		var j = 0
 		for (var i = 0; i < groups.length; i++) {
-			// index; Strongly Disagree -> Moderately Disagree -> ... -> Strongly Agree -> Moderately Agree -> ...
+			// index; Strongly Disagree -> Moderately Disagree -> Strongly Agree -> Moderately Agree
 			if (i >= groups.length / 2) {
-				j = groups.length - (i - groups.length / 2) - 1;
-			} else {
+				// positive
+				j = groups.length - 1 - Math.floor(i - groups.length / 2);
+				stack_order.push(groups[j]);
+			} else if (i <= groups.length / 2 - 1) {
+				// negative
 				j = i;
+				stack_order.push(groups[j]);
 			}
-			
-			stack_order.push(groups[j]);
+		}
+		// Neutral (neg part) -> Neutral (pos part)
+		if (group_neutral != null) {
+			stack_order.push(group_neutral + "0");
+			stack_order.push(group_neutral + "1");
 		}
 		
 		// colors
-		if (categories.length == 4) {
+		if (groups.length == 4) {
 			var chart_colors = ['#ed403c', '#f38e72', '#56c4c5', '#00acac'];
-		} else if (categories.length == 6) {
+		} else if (groups.length == 5) {
+			var chart_colors = ['#ed403c', '#f38e72', '#eeeeee', '#eeeeee', '#56c4c5', '#00acac'];
+		} else if (groups.length == 6) {
 			var chart_colors = ['#ed403c', '#f38e72', '#fdcfc0', '#56c4c5', '#bbe3e3', '#00acac'];
+		} else if (groups.length == 7) {
+			var chart_colors = ['#ed403c', '#f38e72', '#fdcfc0', '#eeeeee', '#eeeeee', '#56c4c5', '#bbe3e3', '#00acac'];
 		}
 			
 		// y axis range
@@ -660,9 +690,13 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 		
 		// axes: set as y2
 		var axes_object = {};
-		$.each(groups, function(i, e) {
+		$.each(categories, function(i, e) {
 			axes_object[e] = 'y2';
 		});
+		
+		console.log(categories);
+		console.log(data_columns);
+		console.log(stack_order);
 		
 		// generate chart
 		chart = c3.generate({
@@ -681,7 +715,8 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 				},
 				type: 'bar',
 				groups: [categories],
-				labels: formatLabelObject('percent_positive'),
+				// labels: formatLabelObject('percent_positive'),
+				labels: null,
 				order: stack_order,
 				axes: axes_object
 			},
@@ -724,6 +759,42 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 					value: function (value, ratio, id) {
 						return (formatLabel('percent'))(Math.abs(value));
 					}
+				},
+				contents: function (d, defaultTitleFormat, defaultValueFormat, color) {
+					// TODO: fix tooltip order
+/* 					var d_new = new Array(groups.length).fill(null);
+					
+					var obj_group_index = {};
+					$.each(groups, function (i, e) {
+						obj_group_index[e] = i;
+					});
+					
+					var neutral_total = 0;
+					$.each(d, function(i, e) {
+						if (group_neutral != null & e.id.substring(0, group_neutral.length) == group_neutral) {
+							neutral_total += Math.abs(e.value);
+						} else {
+							d_new[obj_group_index[e.id]] = e;
+						}
+					});
+					
+					console.log(d_new);
+					console.log(d_new[4]);
+					if (group_neutral != null) {
+						d_new[obj_group_index[group_neutral]] = {value: neutral_total, id: group_neutral + "0", name: group_neutral, x:d[0].x, index:d[0].index};
+					} */			
+				
+					var d_new = [];
+					var total = 0;
+ 					$.each(d, function(i, e) {
+						if (e.id.substring(0, group_neutral.length) == group_neutral) {
+							total += Math.abs(e.value);
+						} else {
+							d_new.push(e);
+						}
+					});
+					d_new.push({value: total, id: group_neutral + "0", name: group_neutral, x:d[0].x, index:d[0].index});
+					return this.getTooltipContent(d_new, defaultTitleFormat, defaultValueFormat, color);
 				}
 			},
 			title: {
@@ -735,7 +806,7 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 			onrendered: function () {
 				d3.selectAll('div#' + div_id + ' .c3-chart-texts text').style('fill', 'black');
 				
-				// data label positioning
+/* 				// data label positioning
 				if (label_format == 'percent') {
 					if (is_single_bar) {
 						var cum_x = 60;
@@ -778,7 +849,7 @@ function loadDivergingStackedBarChart(div_id, dataset, chart_title, var_x, var_y
 							});
 						});
 					}
-				}
+				} */
 			}
 		});
 	})	
