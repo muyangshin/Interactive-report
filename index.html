@@ -14,19 +14,23 @@
 		integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
 	<link href="assets/css/report.css" rel="stylesheet">
-	<title>Interactive Graphs</title>
+	<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Open+Sans" />
+	<title>Interactive Charts</title>
 </head>
 
 <body>
-	<!-- Title Jumbotron -->
-	<div class="jumbotron jumbotron-fluid">
-		<div class="container">
-			<h1 class="display-4">Interactive Chart Examples</h1>
-			<p class="lead">Visit http://c3js.org and https://d3js.org/ for reference</p>
+	<div class="container">
+		<div class="row flex-xl-nowrap header">
+			<div class="col-12 col-md-3 col-xl-2 logo">
+				<img src="assets/images/ucberkeley_logo.png" alt="Home"></a>
+			</div>
+			<div class="col title">
+				<div class="report-title">
+					<h1>Example Interactive Report, 2017-2018</h1>
+				</div>
+			</div>
+			
 		</div>
-	</div>
-	
-	<div class="container-fluid">
 		<div class="row flex-xl-nowrap">
 			<!-- Left: Table of Contents -->
 			<div class="col-12 col-md-3 col-xl-2 bd-sidebar">
@@ -97,14 +101,17 @@
 			<main class="col-12 col-md-9 col-xl-8 py-md-3 pl-md-5 bd-content">
 			</main>
 		</div>
+		<div class="row flex-xl-nowrap footer">
+			<span class="text-muted">This page only works with Mozilla Firefox Browser.</span>
+		</div>
 	</div>
 	
 	<!-- Footer -->
-	<footer class="footer">
+<!-- 	<footer class="footer">
       <div class="container">
         <span class="text-muted">This page only works with Mozilla Firefox Browser.</span>
       </div>
-    </footer>
+    </footer> -->
 
 	<script type="text/javascript">
 		// array to store chart objects
@@ -247,6 +254,9 @@
 						insertChart(chart_id, chart_name);
 						
 						index_chart += 1;
+					} else if (/^<h\d>/.test(value)) {
+						// title; you can't put title inside p
+						$("main").append(value);
 					} else {
 						// text
 						$("main").append("<p>" + value + "</p>");
