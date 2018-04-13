@@ -56,6 +56,10 @@ main {
   border-top: 1px solid rgba(0,0,0,.1);
 }
 
+.div_chart {
+	margin: 20px 0 20px 0;
+}
+
 .c3-title {
 	font-size: large;
 	font-weight: bold;
